@@ -10,13 +10,23 @@ public class Main {
     public static void main(String[] args) {
         Random random = new Random();
         String[] texts = new String[100_000];
+
         for (int i = 0; i < texts.length; i++) {
             texts[i] = generateText("abc", 3 + random.nextInt(3));
-            countBeautifulText(texts[i]);
         }
-        System.out.println("Красивых слов с длиной 3: " + threeLetters);
-        System.out.println("Красивых слов с длиной 4: " + fourLetters);
-        System.out.println("Красивых слов с длиной 5: " + fiveLetters);
+
+        for (String text : texts) {
+            new Thread(() -> countPalindromeWords(text)
+            ).start();
+            new Thread(() -> countSameLettersOnWords(text)
+            ).start();
+            new Thread(() -> countIncreasingWords(text)
+            ).start();
+        }
+
+        printCountText(3, threeLetters.get());
+        printCountText(4, fourLetters.get());
+        printCountText(5, fiveLetters.get());
     }
 
     public static String generateText(String letters, int length) {
@@ -28,20 +38,19 @@ public class Main {
         return text.toString();
     }
 
-    public static void countBeautifulText(String text) {
-        if (isPalindrome(text) || isSameLetters(text) || isIncreasing(text)) {
-            switch (text.length()) {
-                case 3:
-                    threeLetters.getAndIncrement();
-                    break;
-                case 4:
-                    fourLetters.getAndIncrement();
-                    break;
-                case 5:
-                    fiveLetters.getAndIncrement();
-                    break;
-            }
-        }
+    public static void countPalindromeWords(String text) {
+        if (isPalindrome(text))
+            countBeautifulText(text);
+    }
+
+    public static void countSameLettersOnWords(String text) {
+        if (isSameLetters(text))
+            countBeautifulText(text);
+    }
+
+    public static void countIncreasingWords(String text) {
+        if (isIncreasing(text))
+            countBeautifulText(text);
     }
 
     public static boolean isPalindrome(String text) {
@@ -57,5 +66,23 @@ public class Main {
     public static boolean isIncreasing(String text) {
         return IntStream.range(0, text.length() - 1)
                 .noneMatch(i -> text.charAt(i) > text.charAt(i + 1));
+    }
+
+    public static void countBeautifulText(String text) {
+        switch (text.length()) {
+            case 3:
+                threeLetters.getAndIncrement();
+                break;
+            case 4:
+                fourLetters.getAndIncrement();
+                break;
+            case 5:
+                fiveLetters.getAndIncrement();
+                break;
+        }
+    }
+
+    public static void printCountText(int value, int count) {
+        System.out.println("Красивых слов с длиной " + value + ": " + count);
     }
 }
