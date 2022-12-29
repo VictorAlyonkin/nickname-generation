@@ -7,7 +7,7 @@ public class Main {
     public static AtomicInteger fourLetters = new AtomicInteger(0);
     public static AtomicInteger fiveLetters = new AtomicInteger(0);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         Random random = new Random();
         String[] texts = new String[100_000];
 
@@ -15,14 +15,17 @@ public class Main {
             texts[i] = generateText("abc", 3 + random.nextInt(3));
         }
 
-        for (String text : texts) {
-            new Thread(() -> countPalindromeWords(text)
-            ).start();
-            new Thread(() -> countSameLettersOnWords(text)
-            ).start();
-            new Thread(() -> countIncreasingWords(text)
-            ).start();
-        }
+        Thread threadPalindrom = new Thread(() -> countPalindromeWords(texts));
+        Thread threadSameLetters = new Thread(() -> countSameLettersOnWords(texts));
+        Thread threadIncreasing = new Thread(() -> countIncreasingWords(texts));
+
+        threadPalindrom.start();
+        threadSameLetters.start();
+        threadIncreasing.start();
+
+        threadPalindrom.join();
+        threadSameLetters.join();
+        threadIncreasing.join();
 
         printCountText(3, threeLetters.get());
         printCountText(4, fourLetters.get());
@@ -38,19 +41,25 @@ public class Main {
         return text.toString();
     }
 
-    public static void countPalindromeWords(String text) {
-        if (isPalindrome(text))
-            countBeautifulText(text);
+    public static void countPalindromeWords(String[] texts) {
+        for (String text : texts) {
+            if (isPalindrome(text))
+                countBeautifulText(text);
+        }
     }
 
-    public static void countSameLettersOnWords(String text) {
-        if (isSameLetters(text))
-            countBeautifulText(text);
+    public static void countSameLettersOnWords(String[] texts) {
+        for (String text : texts) {
+            if (isSameLetters(text))
+                countBeautifulText(text);
+        }
     }
 
-    public static void countIncreasingWords(String text) {
-        if (isIncreasing(text))
-            countBeautifulText(text);
+    public static void countIncreasingWords(String[] texts) {
+        for (String text : texts) {
+            if (isIncreasing(text))
+                countBeautifulText(text);
+        }
     }
 
     public static boolean isPalindrome(String text) {
